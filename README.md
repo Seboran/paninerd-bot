@@ -2,7 +2,7 @@
 
 ## Description
 
-This is a bot deployed on a discord channel just to have fun and learn about bots. It uses [discord.js] (https://discord.js.org/#/).
+This is a bot deployed on a discord channel just to have fun and learn about bots. It uses [discord.js](https://discord.js.org/#/).
 
 ## How to run it
 
