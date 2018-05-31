@@ -10,6 +10,7 @@ var client = new Discord.Client();
 var config = require('./config.json');
 var token = config.token,
     prefix = config.prefix;
+
 var messagesCancer = require('./rocket-league-rapid-chat.js');
 
 // The ready event is vital, it means that your bot will only start reacting to information
@@ -26,86 +27,96 @@ client.on('ready', function()  {
 
 // Create an event listener for messages
 client.on('message', function(message) {
-  // If the message is "ping"
-    console.log('channel', message.channel.name);
-    if (message.author.bot) return;
-    if(message.channel.name === 'bot-testing') {
-        // !stats
-        if (!message.content.startsWith(prefix)) return;
-        var args = message.content.slice(prefix.length).split(' ');
-        var command = args.shift().toLowerCase();
-        if(command === 'stats') {
-            var author = message.member;
-            console.log(author.user.username);
-            // Checks database
-            db.connect(function (err) {
-                if (err) return console.log(err);
-                // Get URL
-                db.get().query('SELECT urlStats FROM stats_users WHERE id = ?;', [message.author.id], function(err, resultQuery) {
-                    if (err) return console.log(err);
-                    if (!resultQuery) {
-                        return message.channel.send('You must create an account with the command !create url');
-                    }
-                    var user = resultQuery[0];
-                    console.log(user);
-                    return message.channel.send('Statistiques de ' + message.member +'\n' + user.urlStats);
-                });
-            });
-        }
-        if (command === 'create') {
-            // Add an user
-            if (!args.length) {
-                return message.channel.send('You must send your stats url');
-            }
-            db.connect(function(err) {
-                if (err) return console.log(err);
-                // id, username, url
-                var values = [message.author.id, message.member.user.username, args[0]];
-                console.log('value', message.author.id);
-                db.get().query('INSERT INTO stats_users VALUES (?, ?, ?);', values, function(err, resultQuery) {
-                    if (err) {
-                        console.log(err);
-                        return message.channeld.send('User already created, try !update url');
-                    }
-                    message.channel.send('User created ! You can write \'!stats to see your URL later');
-                });
-            });
-        }
-        if (command === 'update') {
-            // Update an user
-            if (!args.length) return message.channel.send('You must send an url');
-            db.connect(function(err) {
-                if (err) return console.log(err);
-                var values = [args[0], message.author.id];
-                db.get().query('UPDATE stats_users SET urlStats = ? WHERE id = ?;', values, function(err, resultQuery) {
-                    if(err) return console.log(err);
-                    if (resultQuery.affectedRows) return message.channel.send('Url updated !');
-                    return message.channel.send('User not found ! Please try \`!create\` url');
-                    
-                });
-            });
-        }
-        
-    }
     
-    if (message.content === 'tupu') {
-        message.channel.send('toi-même ' + message.member);
-    }
-    if (message.content === `${prefix}server`) {
+    if (message.channel.name !== 'bot-testing' || message.author.bot) return;
+
+    bot.answer(message.content === 'ping', function() {
+        message.channel.send('pong ' + message.member);
+    })
+    .answer(message.content === `${prefix}server`, function() {
+        
         message.channel.send(`Nom du serveur : ${message.guild.name}\nNombre de membres: ${message.guild.memberCount}`);
-    }
-    if (message.content === 'good bot') {
-        message.channel.send('merci !');
-    }
-    if (message.content === 'bad bot') {
-        message.channel.send('T_T');
-    }
-    if (message.content.includes('dark') && message.content.includes('plagueis'))
-    {
+
+    })
+    .answer(message.content.includes('good') && message.content.includes('bot'), function() {
+        message.channel.send('Thanks !');
+    })
+    .answer(message.content.includes('bad') && message.content.includes('bot'), function() {
+        message.channel.send('La critique est aisée mais l\'art est difficile');
+    })
+    .answer(message.content.includes('dark') && message.content.includes('plagueis'), function() {
         message.channel.send("I thought not. It's not a story the Jedi would tell you. It's a Sith legend. Darth Plagueis was a Dark Lord of the Sith, so powerful and so wise he could use the Force to influence the midichlorians to create life… He had such a knowledge of the dark side that he could even keep the ones he cared about from dying. The dark side of the Force is a pathway to many abilities some consider to be unnatural. He became so powerful… the only thing he was afraid of was losing his power, which eventually, of course, he did. Unfortunately, he taught his apprentice everything he knew, then his apprentice killed him in his sleep. Ironic. He could save others from death, but not himself.");
-    }
+    });
 
+    // !stats
+    bot.use(message, 'stats', 0, function() {
+        var author = message.member;
+        console.log(author.user.username);
+        // Checks database
+        db.connect(function (err) {
+            if (err) return console.log(err);
+            // Get URL
+            db.get().query('SELECT urlStats FROM stats_users WHERE id = ?;', [message.author.id], function(err, resultQuery) {
+                if (err) return console.log(err);
+                if (!resultQuery) {
+                    return message.channel.send('You must create an account with the command !create url');
+                }
+                var user = resultQuery[0];
+                console.log(user);
+                return message.channel.send('Statistiques de ' + message.member +'\n' + user.urlStats);
+            });
+        });
+    });
 
+    // create
+    bot.use(message, 'create', 1, function(url) {
+
+        db.connect(function(err) {
+
+            // Handle error
+            if (err) return console.log(err);
+
+            // Insert value into database
+            // id, username, url
+            var values = [message.author.id, message.member.user.username, url];
+            console.log('value', message.author.id);
+
+            db.get().query('INSERT INTO stats_users VALUES (?, ?, ?);', values, function(err, resultQuery) {
+
+                // If error (like user non existing)
+                if (err) return message.channel.send('User already created, try \`!update\` \`url\`');
+
+                // Everything when fine
+                message.channel.send('User created ! You can write \'!stats to see your URL later');
+            });
+        });
+    });
+
+    // update
+    bot.use(message, 'update', 1, function(url) {
+        
+        db.connect(function(err) {
+
+            // if error
+            if (err) return console.log(err);
+
+            // update value
+            var values = [url, message.author.id];
+            db.get().query('UPDATE stats_users SET urlStats = ? WHERE id = ?;', values, function(err, resultQuery) {
+
+                // If error
+                if(err) return console.log(err);
+
+                // If user found
+                if (resultQuery.affectedRows) return message.channel.send('Url updated !');
+
+                // If user not found
+                return message.channel.send('User not found ! Please try \`!create\` \`url\`');
+                
+            });
+        });
+
+    });
 
 });
 
