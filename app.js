@@ -7,7 +7,10 @@ var db = require('./db');
 var client = new Discord.Client();
 
 // The token of your bot - https://discordapp.com/developers/applications/me
+
+// This is most likely to crash if you do not have the config file
 var config = require('./config.json');
+
 var token = config.token,
     prefix = config.prefix;
 
@@ -53,68 +56,59 @@ client.on('message', function(message) {
         var author = message.member;
         console.log(author.user.username);
         // Checks database
-        db.connect(function (err) {
+
+        db.query('SELECT urlStats FROM stats_users WHERE id = ?;', [message.author.id], function(err, resultQuery) {
             if (err) return console.log(err);
-            // Get URL
-            db.get().query('SELECT urlStats FROM stats_users WHERE id = ?;', [message.author.id], function(err, resultQuery) {
-                if (err) return console.log(err);
-                if (!resultQuery) {
-                    return message.channel.send('You must create an account with the command !create url');
-                }
-                var user = resultQuery[0];
-                console.log(user);
-                return message.channel.send('Statistiques de ' + message.member +'\n' + user.urlStats);
-            });
+
+            if (!resultQuery) return message.channel.send('You must create an account with the command !create url');
+            
+            var user = resultQuery[0];
+            console.log(user);
+            return message.channel.send('Statistiques de ' + message.member +'\n' + user.urlStats);
+
         });
+
     });
+    
 
     // create
     bot.use(message, 'create', 1, function(url) {
 
-        db.connect(function(err) {
+        // Insert value into database
+        // id, username, url
+        var values = [message.author.id, message.member.user.username, url];
+        console.log('value', message.author.id);
 
-            // Handle error
-            if (err) return console.log(err);
+        db.query('INSERT INTO stats_users VALUES (?, ?, ?);', values, function(err, resultQuery) {
 
-            // Insert value into database
-            // id, username, url
-            var values = [message.author.id, message.member.user.username, url];
-            console.log('value', message.author.id);
+            // If error (like user non existing)
+            if (err) return message.channel.send('User already created, try \`!update\` \`url\`');
 
-            db.get().query('INSERT INTO stats_users VALUES (?, ?, ?);', values, function(err, resultQuery) {
-
-                // If error (like user non existing)
-                if (err) return message.channel.send('User already created, try \`!update\` \`url\`');
-
-                // Everything when fine
-                message.channel.send('User created ! You can write \'!stats to see your URL later');
-            });
+            // Everything when fine
+            message.channel.send('User created ! You can write \'!stats to see your URL later');
         });
+        
     });
+    
 
     // update
     bot.use(message, 'update', 1, function(url) {
-        
-        db.connect(function(err) {
 
-            // if error
-            if (err) return console.log(err);
+        // update value
+        var values = [url, message.author.id];
+        db.query('UPDATE stats_users SET urlStats = ? WHERE id = ?;', values, function(err, resultQuery) {
 
-            // update value
-            var values = [url, message.author.id];
-            db.get().query('UPDATE stats_users SET urlStats = ? WHERE id = ?;', values, function(err, resultQuery) {
+            // If error
+            if(err) return console.log(err);
 
-                // If error
-                if(err) return console.log(err);
+            // If user found
+            if (resultQuery.affectedRows) return message.channel.send('Url updated !');
 
-                // If user found
-                if (resultQuery.affectedRows) return message.channel.send('Url updated !');
-
-                // If user not found
-                return message.channel.send('User not found ! Please try \`!create\` \`url\`');
-                
-            });
+            // If user not found
+            return message.channel.send('User not found ! Please try \`!create\` \`url\`');
+            
         });
+        
 
     });
 
