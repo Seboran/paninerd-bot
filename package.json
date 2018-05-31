@@ -12,6 +12,7 @@
   "author": "Nirina",
   "license": "ISC",
   "dependencies": {
-    "discord.js": "^11.3.2"
+    "discord.js": "^11.3.2",
+    "mysql": "^2.15.0"
   }
 }
