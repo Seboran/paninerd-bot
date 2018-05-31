@@ -33,24 +33,13 @@ client.on('message', function(message) {
     
     if (message.channel.name !== 'bot-testing' || message.author.bot) return;
 
-    bot.answer(message.content === 'ping', function() {
-        message.channel.send('pong ' + message.member);
-    })
-    .answer(message.content === `${prefix}server`, function() {
-        
-        message.channel.send(`Nom du serveur : ${message.guild.name}\nNombre de membres: ${message.guild.memberCount}`);
+    bot.answer(message, 'ping', 'pong ' + message.member);
 
-    })
-    .answer(message.content.includes('good') && message.content.includes('bot'), function() {
-        message.channel.send('Thanks !');
-    })
-    .answer(message.content.includes('bad') && message.content.includes('bot'), function() {
-        message.channel.send('La critique est aisée mais l\'art est difficile');
-    })
-    .answer(message.content.includes('dark') && message.content.includes('plagueis'), function() {
-        message.channel.send("I thought not. It's not a story the Jedi would tell you. It's a Sith legend. Darth Plagueis was a Dark Lord of the Sith, so powerful and so wise he could use the Force to influence the midichlorians to create life… He had such a knowledge of the dark side that he could even keep the ones he cared about from dying. The dark side of the Force is a pathway to many abilities some consider to be unnatural. He became so powerful… the only thing he was afraid of was losing his power, which eventually, of course, he did. Unfortunately, he taught his apprentice everything he knew, then his apprentice killed him in his sleep. Ironic. He could save others from death, but not himself.");
-    });
-
+    bot.answer(message, `${prefix}server`, `Nom du serveur : ${message.guild.name}\nNombre de membres: ${message.guild.memberCount}`);
+    bot.answer(message, 'good', 'bot', 'Thanks');
+    bot.answer(message, 'bad', 'bot', 'La critique est aisée mais l\'art est difficile');
+    bot.answer(message, 'dark', 'plagueis', "I thought not. It's not a story the Jedi would tell you. It's a Sith legend. Darth Plagueis was a Dark Lord of the Sith, so powerful and so wise he could use the Force to influence the midichlorians to create life… He had such a knowledge of the dark side that he could even keep the ones he cared about from dying. The dark side of the Force is a pathway to many abilities some consider to be unnatural. He became so powerful… the only thing he was afraid of was losing his power, which eventually, of course, he did. Unfortunately, he taught his apprentice everything he knew, then his apprentice killed him in his sleep. Ironic. He could save others from death, but not himself.");
+    
     // !stats
     bot.use(message, 'stats', 0, function() {
         var author = message.member;
@@ -96,6 +85,7 @@ client.on('message', function(message) {
 
         // update value
         var values = [url, message.author.id];
+
         db.query('UPDATE stats_users SET urlStats = ? WHERE id = ?;', values, function(err, resultQuery) {
 
             // If error

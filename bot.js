@@ -10,22 +10,43 @@ function Bot() {
 }
 
 /**
- * @param {function(): boolean | boolean} condition the condition to execute
- * @param {function(): void} next what to do
+ * @param {Object} message The discord message
+ * @param {string} wordTrigger the word that triggers the bot
+ * @param {string} response the answer given by the bot
  */
-Bot.prototype.answer = function(condition, next) {
+Bot.prototype.answer = function() {
+        
+    // We want to check only one word
+    if (arguments.length === 3) {
 
-    // If condition then next
+        var message = arguments[0];
+        var wordTrigger = arguments[1];
+        var response = arguments[2];
 
-    var result;
-    // Multi check
-    if (typeof(condition) === 'function') result = condition();
-    if (typeof(condition) === 'boolean') result = condition;
+        if (message.content !== wordTrigger) return this;
 
-    if (!result) return this;
-    next();
+        message.channel.send(response);
+    
+    // We want to check multiple words
+    } else if (arguments.length > 3) {
+
+        var argumentsCopy = Array.prototype.slice.call(arguments, 0);
+        
+        var message = argumentsCopy.shift();
+        var response = argumentsCopy.pop();
+        
+        var wordTriggers = argumentsCopy;
+            
+        // We check if every words left in wordsTriggers are in message
+        if (wordTriggers.every(function(word) {
+            return message.content.includes(word);
+        }))
+            message.channel.send(response);
+    }
+    
     return this;
 };
+
 /**
  * @param {Object} message the received message
  * @param {string} command the command to check
