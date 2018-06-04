@@ -6,7 +6,7 @@ This is a bot deployed on a discord channel just to have fun and learn bots and 
 
 ## How to run it
 
-Clone the repo on your computer and run `npm init` to install all packages. You will need the `config.json` file which is hidden due to security issues. (Don't want to give it's token...).
+Clone the repo on your computer and run `npm init` to install all packages. You will need to set up environment variables to launch your app, more especially `MYSQL_PASSWORD`, `TOKEN` and `TOKEN_API`.
 
 ## Commands
 

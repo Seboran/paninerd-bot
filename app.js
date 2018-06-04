@@ -1,20 +1,26 @@
 var Discord = require('discord.js');
-
 var bot = require('./bot');
+var rls_api = require('./rl-api');
 var db = require('./db');
 
 // Create an instance of a Discord client
 var client = new Discord.Client();
+
+
 
 // The token of your bot - https://discordapp.com/developers/applications/me
 
 // This is most likely to crash if you do not have the config file
 var config = require('./config.json');
 
-var token = config.token,
+var token = process.env.TOKEN,
     prefix = config.prefix;
 
 var messagesCancer = require('./rocket-league-rapid-chat.js');
+
+function randomElement(array) {
+    return array[Math.floor(Math.random() * array.length)];
+}
 
 // The ready event is vital, it means that your bot will only start reacting to information
 // from Discord _after_ ready is emitted
@@ -26,10 +32,23 @@ client.on('ready', function()  {
       console.log('Sent message ' + message.content);
   })
   .catch(console.error);
+  
+
+
 });
 
 // Create an event listener for messages
 client.on('message', function(message) {
+    console.log('received message', message.content);
+
+    bot.use(message, 'salt', 0, function() {
+        var cancerMessage = randomElement(messagesCancer);
+        for(var i = 0; i < 3; i++) {
+            message.channel.send(cancerMessage);
+        }
+        message.channel.send('Chat disabled for 1 second');
+        
+    });
     
     if (message.channel.name !== 'bot-testing' || message.author.bot) return;
 
@@ -43,7 +62,7 @@ client.on('message', function(message) {
     // !stats
     bot.use(message, 'stats', 0, function() {
         var author = message.member;
-        console.log(author.user.username);
+        
         // Checks database
 
         db.query('SELECT urlStats FROM stats_users WHERE id = ?;', [message.author.id], function(err, resultQuery) {
@@ -66,14 +85,13 @@ client.on('message', function(message) {
         // Insert value into database
         // id, username, url
         var values = [message.author.id, message.member.user.username, url];
-        console.log('value', message.author.id);
 
         db.query('INSERT INTO stats_users VALUES (?, ?, ?);', values, function(err, resultQuery) {
 
             // If error (like user non existing)
             if (err) return message.channel.send('User already created, try \`!update\` \`url\`');
 
-            // Everything when fine
+            // Everything went fine
             message.channel.send('User created ! You can write \'!stats to see your URL later');
         });
         
@@ -101,6 +119,43 @@ client.on('message', function(message) {
         
 
     });
+
+    //statsNew
+    bot.use(message, 'statsnew', 0, function() {
+        db.query('SELECT urlStats FROM stats_users WHERE id = ?;', [message.author.id], function(err, resultQuery) {
+            if (err) return console.log(err);
+
+            if (!resultQuery) return message.channel.send('You must create an account with the command !create url');
+            
+            var user = resultQuery[0];
+            console.log(user);
+            rls_api.getPlayer(user.urlStats, function(data) {
+                if (data) {
+
+                    // Extract season data
+                    
+                    rls_api.getSeason(function(season) {
+                        console.log('current season', season);
+                        var seasonStats = data.rankedSeasons[season];
+                        console.log('season stats', seasonStats);
+                        return message.channel.send('Statistiques de ' + message.member +'\n' +
+                        '3v3 standard : ' + JSON.stringify(seasonStats['13']) + '\n' +
+                        '2v2 : ' + seasonStats['11'] + '\n' +
+                        '1v1 : ' + seasonStats['10'] + '\n' + 
+                        '3v3 solo : ' + seasonStats['12'] + '\n' +
+                        'wins : ' + data.stats.wins + '; mvp : ' + data.stats.mvps + '\n' +
+                        'goals : ' + data.stats.goals+ '; saves : ' + data.stats.saves + '; assists : ' + data.stats.assists);
+                    });
+                    
+                }
+                return message.channel.send('You must create an account with the command !create url');
+            });
+            
+
+        });
+    });
+
+    
 
 });
 
