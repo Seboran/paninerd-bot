@@ -4,7 +4,9 @@
   "description": "A bot to shitpost on a discord",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "pm2 start app.js --watch",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "stop": "pm2 stop app"
   },
   "keywords": [
     "bot"

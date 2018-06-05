@@ -72,7 +72,18 @@ client.on('message', function(message) {
             
             var user = resultQuery[0];
             console.log(user);
-            return message.channel.send('Statistiques de ' + message.member +'\n' + user.urlStats);
+            rls_api.getPlayer(user.urlStats, function(data) {
+                if (data) {
+                    console.log('data info', data);
+                    // Extract season data
+                    
+                    return message.channel.send('Statistiques de ' + message.member +'\n' +
+                    data.signatureUrl);
+                    
+                }
+                return message.channel.send('You must create an account with the command !create url');
+            });
+            
 
         });
 
@@ -92,7 +103,7 @@ client.on('message', function(message) {
             if (err) return message.channel.send('User already created, try \`!update\` \`url\`');
 
             // Everything went fine
-            message.channel.send('User created ! You can write \'!stats to see your URL later');
+            message.channel.send('User created ! You can write `!stats` to see your URL later');
         });
         
     });
@@ -110,7 +121,7 @@ client.on('message', function(message) {
             if(err) return console.log(err);
 
             // If user found
-            if (resultQuery.affectedRows) return message.channel.send('Url updated !');
+            if (resultQuery.affectedRows) return message.channel.send('Url updated ! Try the command `!stats`');
 
             // If user not found
             return message.channel.send('User not found ! Please try \`!create\` \`url\`');
@@ -120,39 +131,14 @@ client.on('message', function(message) {
 
     });
 
-    //statsNew
-    bot.use(message, 'statsnew', 0, function() {
-        db.query('SELECT urlStats FROM stats_users WHERE id = ?;', [message.author.id], function(err, resultQuery) {
-            if (err) return console.log(err);
 
-            if (!resultQuery) return message.channel.send('You must create an account with the command !create url');
-            
-            var user = resultQuery[0];
-            console.log(user);
-            rls_api.getPlayer(user.urlStats, function(data) {
-                if (data) {
-
-                    // Extract season data
-                    
-                    rls_api.getSeason(function(season) {
-                        console.log('current season', season);
-                        var seasonStats = data.rankedSeasons[season];
-                        console.log('season stats', seasonStats);
-                        return message.channel.send('Statistiques de ' + message.member +'\n' +
-                        '3v3 standard : ' + JSON.stringify(seasonStats['13']) + '\n' +
-                        '2v2 : ' + seasonStats['11'] + '\n' +
-                        '1v1 : ' + seasonStats['10'] + '\n' + 
-                        '3v3 solo : ' + seasonStats['12'] + '\n' +
-                        'wins : ' + data.stats.wins + '; mvp : ' + data.stats.mvps + '\n' +
-                        'goals : ' + data.stats.goals+ '; saves : ' + data.stats.saves + '; assists : ' + data.stats.assists);
-                    });
-                    
-                }
-                return message.channel.send('You must create an account with the command !create url');
-            });
-            
-
-        });
+    bot.use(message, 'help', 0, function() {
+        message.channel.send(
+            'Le robot paninerd possède les fonctionnalités suivantes :\n' +
+            '`!create player-id` permet au bot de savoir où trouver ses stats. Tu peux trouver ton `player-id` sur <https://rocketleaguestats.com/>\n' +
+            '`!update player-id` te permet de modifier ton player-id\n' +
+            '`!stats` te permet de voir tes stats'
+        );
     });
 
     
