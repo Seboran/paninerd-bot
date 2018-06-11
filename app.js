@@ -1,12 +1,12 @@
+
 var Discord = require('discord.js');
 var bot = require('./bot');
 var rls_api = require('./rl-api');
 var db = require('./db');
 
+
 // Create an instance of a Discord client
 var client = new Discord.Client();
-
-
 
 // The token of your bot - https://discordapp.com/developers/applications/me
 
@@ -26,7 +26,7 @@ function randomElement(array) {
 // from Discord _after_ ready is emitted
 client.on('ready', function()  {
   console.log('I am ready!');
-  var channel = client.channels.get('451430959116582936');
+  var channel = client.channels.get(process.env.CHANNEL_ID);
   channel.send(messagesCancer[Math.floor(Math.random() * messagesCancer.length)])
   .then(function(message) {
       console.log('Sent message ' + message.content);
@@ -70,7 +70,7 @@ client.on('message', function(message) {
                     console.log('data info', data);
                     // Extract season data
                     
-                    return message.channel.send('Statistiques de ' + message.member, {files: [data.signatureUrl]});
+                    return message.author.send('Statistiques de ' + message.member, {files: [data.signatureUrl]});
                     
                 }
                 return message.channel.send('You must create an account with the command !create url');
@@ -148,8 +148,20 @@ client.on('message', function(message) {
 
 });
 
+// Send twitch data
+setInterval(function() {
+    var getData = {
+        method: 'GET',
+        headers: {
+            'Client-ID': '8l0jin92206uapy9vl23zxclgg2x92'
+        }   
+    };
+
+}, 5000);
+
 client.on('error', function(error) {
-    console.log(error);
+    console.log(error); 
+    var channel = client.channels.get('451430959116582936');
 });
 
 // Log our bot in
