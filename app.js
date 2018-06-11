@@ -3,6 +3,7 @@ var Discord = require('discord.js');
 var bot = require('./bot');
 var rls_api = require('./rl-api');
 var db = require('./db');
+var fetch = require('node-fetch');
 
 
 // Create an instance of a Discord client
@@ -24,9 +25,14 @@ function randomElement(array) {
 
 // The ready event is vital, it means that your bot will only start reacting to information
 // from Discord _after_ ready is emitted
+var channel;
+
+var channelNews;
+
 client.on('ready', function()  {
   console.log('I am ready!');
-  var channel = client.channels.get(process.env.CHANNEL_ID);
+  channel = client.channels.get(process.env.CHANNEL_ID);
+  channelNews = client.channels.get('426854878552522792');
   channel.send(messagesCancer[Math.floor(Math.random() * messagesCancer.length)])
   .then(function(message) {
       console.log('Sent message ' + message.content);
@@ -157,11 +163,19 @@ setInterval(function() {
         }   
     };
 
-}, 5000);
+    fetch('https://api.twitch.tv/helix/streams?user_id=57781936', getData)
+    .then(res => res.json())
+    .then(resJson => {
+        if (resJson.length && resJson[0].type === 'live') return channelNews.send('Rocket League Stream is live on https://www.twitch.tv/rocketleague');
+    })
+    .catch(err => console.log(err));
+
+
+
+}, 3000000);
 
 client.on('error', function(error) {
     console.log(error); 
-    var channel = client.channels.get('451430959116582936');
 });
 
 // Log our bot in
