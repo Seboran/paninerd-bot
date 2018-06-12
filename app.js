@@ -1,13 +1,13 @@
-
 var Discord = require('discord.js');
 var bot = require('./bot');
 var rls_api = require('./rl-api');
 var db = require('./db');
 var fetch = require('node-fetch');
 
-
 // Create an instance of a Discord client
 var client = new Discord.Client();
+
+
 
 // The token of your bot - https://discordapp.com/developers/applications/me
 
@@ -76,7 +76,7 @@ client.on('message', function(message) {
                     console.log('data info', data);
                     // Extract season data
                     
-                    return message.author.send('Statistiques de ' + message.member, {files: [data.signatureUrl]});
+                    return message.channel.send('Statistiques de ' + message.member, {files: [data.signatureUrl]});
                     
                 }
                 return message.channel.send('You must create an account with the command !create url');
