@@ -67,7 +67,7 @@ client.on('message', function(message) {
         db.query('SELECT urlStats FROM stats_users WHERE id = ?;', [message.author.id], function(err, resultQuery) {
             if (err) return console.log(err);
 
-            if (!resultQuery) return message.channel.send('You must create an account with the command !create url');
+            if (!resultQuery.length) return message.channel.send('You must create an account with the command !create url');
             
             var user = resultQuery[0];
             console.log(user);
