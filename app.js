@@ -154,7 +154,7 @@ db.connect(function() {
         bot.use(message, 'tip', 1, function() {
             
             var member = message.mentions.members.first();
-
+            if (!member) return message.channel.send('Vous devez mentionner une personne présente sur ce discord.');
             console.log('Mentionned member', member.id);
 
             if (member.id === message.member.id) return message.channel.send('Vous ne pouvez pas donner de point à vous même !');
