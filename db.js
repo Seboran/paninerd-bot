@@ -16,12 +16,7 @@ exports.connect = function(callback) {
 };
 
 exports.query = function(query, values, callback) {
-    state.pool = mysql.createPool({
-        host: 'localhost',
-        user: 'root',
-        password: 'password',
-        database: 'paninerd_bot'
-    });
+    
     state.pool.query(query, values, callback);
 };
 
