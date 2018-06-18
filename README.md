@@ -13,8 +13,8 @@ Clone the repo on your computer and run `npm init` to install all packages. You 
 `!salt`
 This displays random RL messages like during a typical salty player.
 
-`!create url`
-Creates an user. You must send a url pointing towards your RL Stats. You can find stats here on [Rocket League Stats](https://rocketleaguestats.com).
+`!create RL-number`
+Creates an user. You must send your Rocket League Stats id. You can find stats here on [Rocket League Stats](https://rocketleaguestats.com).
 
 `!udpate url`
 Modify the given url. You must create an account before updating it.
@@ -22,7 +22,9 @@ Modify the given url. You must create an account before updating it.
 `!stats`
 Displays the player stats.
 
+`!tip member`
+Sends an internet point to the mentionned member
+
 ## Authors
 
 * **Nirina Rabeson** - *Initial work* - [Seboran](https://github.com/Seboran)
-
