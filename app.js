@@ -171,18 +171,21 @@ db.connect(function() {
 
                         if (err) return message.channel.send('Something went horribly wrong');
                         var pluriel = (resultSelect[0].points > 1) ? 's' : '';
-                        return message.channel.send('Point internet donné !\n' + member + ' a désormais ***' + resultSelect[0].points + ' point' + pluriel + '*** internet !!!');
-
+                        
+                        if (member.id ==='451424867074441226') {
+                            return message.channel.send('Merci !\n' + 'J\'ai désormais ***' + resultSelect[0].points + ' point' + pluriel + '*** internet !!!');
+                        } else {
+                            return message.channel.send('Point internet donné !\n' + member + ' a désormais ***' + resultSelect[0].points + ' point' + pluriel + '*** internet !!!');
+                        }
                     });
                     
                 } else {
                     // Means the player isn't created yet
-                    console.log('Create', member.id, member.username)
                     db.query('INSERT INTO stats_users VALUES (?, ?, NULL, ?);', [member.id, member.user.username, 1], function(err, resultCreate) {
                         if (err) return message.channel.send('Something went horribly wrong');
 
                         return message.channel.send('Point internet donné !\n' + member + ' a désormais ***1 point*** internet !!!');
-                    })
+                    });
                 }
             });
     
