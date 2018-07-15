@@ -123,6 +123,26 @@ db.connect(function() {
       );
     });
 
+    bot.use(message, "top", 0, function() {
+        message.channel.send("Classement des membres avec le plus de points :")
+      db.query("SELECT username, points FROM stats_users;", [], function(
+        err,
+        result
+      ) {
+        console.log(result, err);
+        result.sort((a, b) => b.points - a.points);
+        var userPoints = ""
+
+        for (x in result) {
+            var user = result[x];
+            var pluriel = user.points > 1 ? "s" : "";
+            userPoints += user.username + " a ***" + user.points + " point" + pluriel + "*** !!!\n"
+        }
+        message.channel.send(userPoints);
+
+      });
+    });
+
     bot.answer(message, "ping", "pong " + message.member);
 
     bot.answer(message, "good", "bot", "Thanks");
