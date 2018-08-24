@@ -5,7 +5,7 @@
   "main": "app.js",
   "scripts": {
     "start": "pm2 start app.js --watch",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest",
     "stop": "pm2 stop app"
   },
   "keywords": [

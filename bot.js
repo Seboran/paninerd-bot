@@ -1,12 +1,13 @@
-var Discord = require('discord.js');
+var Discord = require("discord.js");
 
-var config = require('./config.json');
+var config = require("./config.json");
 var token = config.token,
-    prefix = config.prefix;
+  prefix = config.prefix;
 
 function Bot() {
-    this.client = new Discord.Client();
-    this.wrongCommand = 'I don\'t know this command, send \`!help\` for more information';
+  this.client = new Discord.Client();
+  this.wrongCommand =
+    "I don't know this command, send `!help` for more information";
 }
 
 /**
@@ -15,36 +16,35 @@ function Bot() {
  * @param {string} response the answer given by the bot
  */
 Bot.prototype.answer = function() {
-        
-    // We want to check only one word
-    if (arguments.length === 3) {
+  // We want to check only one word
+  if (arguments.length === 3) {
+    var message = arguments[0];
+    var wordTrigger = arguments[1];
+    var response = arguments[2];
 
-        var message = arguments[0];
-        var wordTrigger = arguments[1];
-        var response = arguments[2];
+    if (message.content !== wordTrigger) return this;
 
-        if (message.content !== wordTrigger) return this;
+    message.channel.send(response);
 
-        message.channel.send(response);
-    
     // We want to check multiple words
-    } else if (arguments.length > 3) {
+  } else if (arguments.length > 3) {
+    var argumentsCopy = Array.prototype.slice.call(arguments, 0);
 
-        var argumentsCopy = Array.prototype.slice.call(arguments, 0);
-        
-        var message = argumentsCopy.shift();
-        var response = argumentsCopy.pop();
-        
-        var wordTriggers = argumentsCopy;
-            
-        // We check if every words left in wordsTriggers are in message
-        if (wordTriggers.every(function(word) {
-            return message.content.includes(word);
-        }))
-            message.channel.send(response);
-    }
-    
-    return this;
+    var message = argumentsCopy.shift();
+    var response = argumentsCopy.pop();
+
+    var wordTriggers = argumentsCopy;
+
+    // We check if every words left in wordsTriggers are in message
+    if (
+      wordTriggers.every(function(word) {
+        return message.content.includes(word);
+      })
+    )
+      message.channel.send(response);
+  }
+
+  return this;
 };
 
 /**
@@ -55,28 +55,23 @@ Bot.prototype.answer = function() {
  */
 
 Bot.prototype.use = function(message, command, numberOfArgs, next) {
-    // Tests if the command starts with a prefix
-    if (!message.content.startsWith(prefix)) return this;
+  // Tests if the command starts with a prefix
+  if (!message.content.startsWith(prefix)) return this;
 
-    // Splits the input into words
-    var args = message.content.slice(prefix.length).split(' ');
-    // shift pops the first element
-    var receivedCommand = args.shift().toLowerCase();
+  // Splits the input into words
+  var args = message.content.slice(prefix.length).split(" ");
+  // shift pops the first element
+  var receivedCommand = args.shift().toLowerCase();
 
+  // Not the good command
+  if (receivedCommand !== command) return this;
 
+  // TODO : send why the command is wrongly used
+  // Not the right amount of arguments
+  if (args.length !== numberOfArgs) return this;
 
-    // Not the good command
-    if(receivedCommand !== command) return this;
-
-    // TODO : send why the command is wrongly used
-    // Not the right amount of arguments
-    if (args.length !== numberOfArgs) return this;
-
-    next.apply(this, args);
-    return this;
-    
-
-    
+  next.apply(this, args);
+  return this;
 };
 
-module.exports = (new Bot());
+module.exports = new Bot();
