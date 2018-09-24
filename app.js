@@ -30,13 +30,39 @@ var channelNews;
 client.on("ready", function() {
   console.log("I am ready!");
   channel = client.channels.get(process.env.CHANNEL_ID);
-  channelNews = client.channels.get("426854878552522792");
+  channelNews = client.channels.get("407631545789054986");
   channel
     .send(messagesCancer[Math.floor(Math.random() * messagesCancer.length)])
     .then(function(message) {
       console.log("Sent message " + message.content);
     })
     .catch(console.error);
+
+  var live = false;
+
+  // Send twitch data
+  setInterval(function() {
+    var getData = {
+      method: "GET",
+      headers: {
+        "Client-ID": "8l0jin92206uapy9vl23zxclgg2x92"
+      }
+    };
+    // 57781936
+    fetch("https://api.twitch.tv/helix/streams?user_id=57781936", getData)
+      .then(res => res.json())
+      .then(resJson => {
+        // console.log(resJson);
+        if (resJson.data.length !== 0 && !live) {
+          live = true;
+          console.log("is live");
+          channelNews.send("RL stream en cours <@&482545349865766929>");
+        } else if (resJson.data.length === 0) {
+          live = false;
+        }
+      })
+      .catch(err => console.log(err));
+  }, 5000);
 });
 
 // Create an event listener for messages
@@ -124,22 +150,27 @@ db.connect(function() {
     });
 
     bot.use(message, "top", 0, function() {
-        message.channel.send("Classement des membres avec le plus de points :")
+      message.channel.send("Classement des membres avec le plus de points :");
       db.query("SELECT username, points FROM stats_users;", [], function(
         err,
         result
       ) {
         console.log(result, err);
         result.sort((a, b) => b.points - a.points);
-        var userPoints = ""
+        var userPoints = "";
 
         for (x in result) {
-            var user = result[x];
-            var pluriel = user.points > 1 ? "s" : "";
-            userPoints += user.username + " a ***" + user.points + " point" + pluriel + "*** !!!\n"
+          var user = result[x];
+          var pluriel = user.points > 1 ? "s" : "";
+          userPoints +=
+            user.username +
+            " a ***" +
+            user.points +
+            " point" +
+            pluriel +
+            "*** !!!\n";
         }
         message.channel.send(userPoints);
-
       });
     });
 
@@ -293,26 +324,6 @@ db.connect(function() {
     });
   });
 });
-
-// Send twitch data
-setInterval(function() {
-  var getData = {
-    method: "GET",
-    headers: {
-      "Client-ID": "8l0jin92206uapy9vl23zxclgg2x92"
-    }
-  };
-
-  fetch("https://api.twitch.tv/helix/streams?user_id=57781936", getData)
-    .then(res => res.json())
-    .then(resJson => {
-      if (resJson.length && resJson[0].type === "live")
-        return channelNews.send(
-          "Rocket League Stream is live on https://www.twitch.tv/rocketleague"
-        );
-    })
-    .catch(err => console.log(err));
-}, 3000000);
 
 client.on("error", function(error) {
   console.log(error);
