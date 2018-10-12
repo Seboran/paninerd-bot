@@ -27,6 +27,8 @@ var channel;
 
 var channelNews;
 
+var pooling = false;
+
 client.on("ready", function() {
   console.log("I am ready!");
   channel = client.channels.get(process.env.CHANNEL_ID);
@@ -40,29 +42,39 @@ client.on("ready", function() {
 
   var live = false;
 
-  // Send twitch data
-  setInterval(function() {
-    var getData = {
-      method: "GET",
-      headers: {
-        "Client-ID": "8l0jin92206uapy9vl23zxclgg2x92"
-      }
-    };
-    // 57781936
-    fetch("https://api.twitch.tv/helix/streams?user_id=57781936", getData)
-      .then(res => res.json())
-      .then(resJson => {
-        // console.log(resJson);
-        if (resJson.data.length !== 0 && !live) {
-          live = true;
-          console.log("is live");
-          channelNews.send("RL stream en cours <@&482545349865766929>");
-        } else if (resJson.data.length === 0) {
-          live = false;
+  if (!pooling) {
+    pooling = true;
+    // Send twitch data
+    setInterval(function() {
+      var getData = {
+        method: "GET",
+        headers: {
+          "Client-ID": "8l0jin92206uapy9vl23zxclgg2x92"
         }
-      })
-      .catch(err => console.log(err));
-  }, 5000);
+      };
+      // 57781936
+      fetch("https://api.twitch.tv/helix/streams?user_id=57781936", getData)
+        .then(res => res.json())
+        .then(resJson => {
+          console.log(resJson);
+          if (resJson.data.length !== 0 && !live) {
+            live = true;
+            console.log("is live");
+
+            var stream = resJson.data[0];
+
+            channelNews.send(
+              "<@&482545349865766929> Stream Rocket League en cours : " +
+                stream.title +
+                "\n<https://www.twitch.tv/rocketleague>"
+            );
+          } else if (resJson.data.length === 0) {
+            live = false;
+          }
+        })
+        .catch(err => console.log(err));
+    }, 50000);
+  }
 });
 
 // Create an event listener for messages
