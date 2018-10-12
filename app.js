@@ -49,7 +49,7 @@ client.on(
     if (!pooling) {
       pooling = true;
       // Send twitch data
-      var lastMessage;
+      var lastMessage = null;
       setInterval(
         function() {
           var getData = {
@@ -89,9 +89,15 @@ client.on(
 
                 if (lastMessage.content != newMessage)
                   lastMessage.edit(newMessage);
-              } else if (resJson.data.length === 0) {
+              } else if (resJson.data.length === 0 && lastMessage != null) {
                 live = false;
+                lastMessage.edit(
+                  "<@&482545349865766929> Stream Rocket League fini : " +
+                    "\n<https://www.twitch.tv/rocketleague>"
+                );
                 lastMessage = null;
+              } else {
+                live = false;
               }
             })
             .catch(err => console.log(err));
