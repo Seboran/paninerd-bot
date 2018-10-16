@@ -74,7 +74,8 @@ client.on(
                   .send(
                     "<@&482545349865766929> Stream Rocket League en cours : " +
                       stream.title +
-                      "\n<https://www.twitch.tv/rocketleague>"
+                      "\n<https://www.twitch.tv/rocketleague>",
+                    { tts: true }
                   )
                   .then(message => {
                     lastMessage = message;
@@ -340,7 +341,8 @@ db.connect(function() {
                       resultSelect[0].points +
                       " point" +
                       pluriel +
-                      "*** internet !!!"
+                      "*** internet !!!",
+                    { tts: true }
                   );
                 }
               }
