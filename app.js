@@ -50,6 +50,7 @@ client.on(
       pooling = true;
       // Send twitch data
       var lastMessage = null;
+      var lastStreamTitle = null;
       setInterval(
         function() {
           var getData = {
@@ -69,7 +70,7 @@ client.on(
                 console.log("is live");
 
                 var stream = resJson.data[0];
-
+                lastStreamTitle = stream.title;
                 channelNews
                   .send(
                     "<@&482545349865766929> Stream Rocket League en cours : " +
@@ -82,7 +83,7 @@ client.on(
                   });
               } else if (resJson.data.length !== 0) {
                 var stream = resJson.data[0];
-
+                lastStreamTitle = stream.title;
                 var newMessage =
                   "<@&482545349865766929> Stream Rocket League en cours : " +
                   stream.title +
@@ -93,9 +94,12 @@ client.on(
               } else if (resJson.data.length === 0 && lastMessage != null) {
                 live = false;
                 lastMessage.edit(
-                  "<@&482545349865766929> Stream Rocket League fini : " +
+                  "<@&482545349865766929> Stream Rocket League " +
+                    lastStreamTitle +
+                    "(fini) : " +
                     "\n<https://www.twitch.tv/rocketleague>"
                 );
+                lastStreamTitle = null;
                 lastMessage = null;
               } else {
                 live = false;
@@ -367,6 +371,8 @@ db.connect(function() {
         }
       );
     });
+
+    bot.react(message, "énorme", "🇨", "🇲", "🇧");
   });
 });
 

@@ -1,4 +1,5 @@
 var Discord = require("discord.js");
+var Promise = require("bluebird");
 
 var config = require("./config.json");
 var token = config.token,
@@ -12,7 +13,7 @@ function Bot() {
 
 /**
  * @param {Object} message The discord message
- * @param {string} wordTrigger the word that triggers the bot
+ * @param {...string} wordTrigger the word that triggers the bot
  * @param {string} response the answer given by the bot
  */
 Bot.prototype.answer = function() {
@@ -72,6 +73,21 @@ Bot.prototype.use = function(message, command, numberOfArgs, next) {
 
   next.apply(this, args);
   return this;
+};
+/**
+ * @param {Object} message The discord message
+ * @param {string} wordTrigger the word that triggers the bot
+ * @param {...string} emojis the answer given by the bot
+ */
+Bot.prototype.react = function() {
+  var argumentsCopy = Array.prototype.slice.call(arguments, 0);
+  var message = argumentsCopy.shift();
+  var wordTrigger = argumentsCopy.shift();
+  if (message.content.includes(wordTrigger)) {
+    Promise.each(argumentsCopy, emoji => message.react(emoji)).then(() =>
+      console.log("emojied")
+    );
+  }
 };
 
 module.exports = new Bot();
