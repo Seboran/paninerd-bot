@@ -298,8 +298,9 @@ db.connect(function() {
       );
     });
 
-    bot.use(message, "tip", 1, function() {
+    bot.use(message, "tip", 2, function(args) {
       var member = message.mentions.members.first();
+      console.log("blblbl", args);
       if (!member)
         return message.channel.send(
           "Vous devez mentionner une personne présente sur ce discord."
@@ -328,6 +329,14 @@ db.connect(function() {
                   return message.channel.send("Something went horribly wrong");
                 var pluriel = resultSelect[0].points > 1 ? "s" : "";
 
+                // Custom message
+                var customMessage = message.content.substring(4);
+                if (customMessage.length > 0) {
+                  message.channel
+                    .send(customMessage, { tts: true })
+                    .then(message => message.delete(1000));
+                }
+
                 if (member.id === "451424867074441226") {
                   return message.channel.send(
                     "Merci !\n" +
@@ -345,8 +354,7 @@ db.connect(function() {
                       resultSelect[0].points +
                       " point" +
                       pluriel +
-                      "*** internet !!!",
-                    { tts: true }
+                      "*** internet !!!"
                   );
                 }
               }

@@ -65,11 +65,10 @@ Bot.prototype.use = function(message, command, numberOfArgs, next) {
   var receivedCommand = args.shift().toLowerCase();
 
   // Not the good command
-  if (receivedCommand !== command) return this;
+  if (receivedCommand.localeCompare(command)) return this;
 
   // TODO : send why the command is wrongly used
   // Not the right amount of arguments
-  if (args.length !== numberOfArgs) return this;
 
   next.apply(this, args);
   return this;
