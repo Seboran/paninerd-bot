@@ -75,8 +75,7 @@ client.on(
                   .send(
                     "<@&482545349865766929> Stream Rocket League en cours : " +
                       stream.title +
-                      "\n<https://www.twitch.tv/rocketleague>",
-                    { tts: true }
+                      "\n<https://www.twitch.tv/rocketleague>"
                   )
                   .then(message => {
                     lastMessage = message;
